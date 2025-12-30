@@ -1,116 +1,62 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <title>AlbaSpace – Shop</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- Define core colour variables to match the existing site theme.  These
-       variables are referenced in site.css and shop.css for consistency. -->
-  <style>
-    :root {
-      --header-bg: #020617;
-      --accent: #00c2ff;
-      --page-bg: #ffffff;
-      --text-main: #111827;
-      --text-muted: #4b5563;
-    }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-      background: var(--page-bg);
-      color: var(--text-main);
-    }
-  </style>
-
-  <!-- Shop specific styles -->
-  <link rel="stylesheet" href="../assets/css/shop.css" />
-  <script src="../assets/js/cart.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mağaza – AlbaSpace</title>
+  <!-- Temel stil dosyaları ve mağazaya özel stil -->
+  <link rel="stylesheet" href="/assets/css/site.css">
+  <link rel="stylesheet" href="/assets/css/shop.css">
+  <!-- Header/footer'ı yüklemek ve sepet mantığını eklemek için scriptler -->
+  <script src="/assets/js/include.js" defer></script>
+  <script src="/assets/js/menu-toggle.js" defer></script>
+  <script src="/assets/js/cart.js" defer></script>
 </head>
-
 <body>
-  <!-- Header with navigation and cart icon -->
-  <header class="site-header">
-    <div class="header-inner">
-        <a href="index.html" class="header-logo" style="text-decoration:none;color:inherit;">
-        <span style="font-weight:700;font-size:18px;letter-spacing:0.08em;">AlbaSpace</span>
-      </a>
-      <nav class="main-nav">
-        <a href="index.html">Home</a>
-        <a href="shop.html" class="active">Shop</a>
-      </nav>
-      <div class="cart-icon">
-        <a href="cart.html" aria-label="View cart" style="color:inherit;position:relative;display:inline-flex;align-items:center;">
-          <!-- Simple cart icon drawn with an SVG path -->
-          <svg viewBox="0 0 24 24" stroke-width="1.6" xmlns="http://www.w3.org/2000/svg">
-            <path d="M3 3h2l2.68 10.74a2 2 0 0 0 2 1.54h8.96a2 2 0 0 0 2-1.54L21 6H6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
-            <circle cx="9" cy="21" r="1" fill="currentColor" />
-            <circle cx="19" cy="21" r="1" fill="currentColor" />
-          </svg>
-          <span class="cart-count">0</span>
-        </a>
-      </div>
-    </div>
-  </header>
+  <!-- Dinamik başlık dahil etme. include.js, bunu mevcut sitenizdeki
+       /header-tr.html içeriğiyle değiştirecektir. -->
+  <div data-include="/header-tr.html"></div>
 
-  <!-- Page content -->
   <main class="shop-container">
-    <h1 class="section-title">Shop</h1>
-    <p class="section-subtitle">Discover unique space‑themed products</p>
+    <h1 style="text-align:center;margin-bottom:8px;">Mağaza</h1>
+    <p style="text-align:center;margin-bottom:32px;color:var(--text-muted);">AlbaSpace kıyafet ve koleksiyonlarını keşfedin.</p>
     <div class="product-list">
-      <!-- Dragon Scale Model product card -->
-      <div class="product-card">
-        <a href="product-dragon.html" style="display:block;">
-          <img src="../assets/images/dragon.png" alt="Dragon Scale Model" />
-        </a>
+      <!-- Dragon ölçek modeli -->
+      <a href="/tr/product-dragon.html" class="product-card">
+        <img src="/assets/images/dragon.png" alt="SpaceX Dragon Ölçek Modeli">
         <div class="product-info">
-          <h3>Dragon&nbsp;Scale&nbsp;Model</h3>
+          <h3>SpaceX Dragon Ölçek Modeli</h3>
           <div class="product-price">$300.00</div>
         </div>
-      </div>
-      <!-- Unisex Starbase City Pullover Hoodie -->
-      <div class="product-card">
-        <a href="product-hoodie.html" style="display:block;">
-          <img src="../assets/images/hoodie.png" alt="Starbase City Pullover Hoodie" />
-        </a>
+      </a>
+      <!-- Kapüşonlu sweat -->
+      <a href="/tr/product-hoodie.html" class="product-card">
+        <img src="/assets/images/hoodie.png" alt="Unisex SpaceX Kapüşonlu Sweat">
         <div class="product-info">
-          <h3>Starbase&nbsp;Pullover&nbsp;Hoodie</h3>
+          <h3>Unisex SpaceX Kapüşonlu Sweat</h3>
           <div class="product-price">$65.00</div>
         </div>
-      </div>
-      <!-- Starbase City 3D Trucker Hat -->
-      <div class="product-card">
-        <a href="product-hat.html" style="display:block;">
-          <img src="../assets/images/hat.png" alt="Starbase City 3D Trucker Hat" />
-        </a>
+      </a>
+      <!-- Trucker şapka -->
+      <a href="/tr/product-hat.html" class="product-card">
+        <img src="/assets/images/hat.png" alt="Starbase City 3D Şapka">
         <div class="product-info">
-          <h3>Starbase&nbsp;3D&nbsp;Trucker&nbsp;Hat</h3>
+          <h3>Starbase City 3D Kamyon Şapka</h3>
           <div class="product-price">$40.00</div>
         </div>
-      </div>
-      <!-- Unisex Starbase City T‑Shirt -->
-      <div class="product-card">
-        <a href="product-shirt.html" style="display:block;">
-          <img src="../assets/images/shirt.png" alt="Starbase City T‑Shirt" />
-        </a>
+      </a>
+      <!-- Tişört -->
+      <a href="/tr/product-shirt.html" class="product-card">
+        <img src="/assets/images/shirt.png" alt="Unisex Starbase City Tişört">
         <div class="product-info">
-          <h3>Starbase&nbsp;City&nbsp;T‑Shirt</h3>
+          <h3>Unisex Starbase City Tişört</h3>
           <div class="product-price">$35.00</div>
         </div>
-      </div>
+      </a>
     </div>
   </main>
 
-  <!-- Minimal footer to finish the page.  It adopts the site colours. -->
-  <footer class="footer" style="background:var(--header-bg);color:#d1d5db;padding:26px 20px;font-size:13px;">
-    <div class="footer-grid" style="max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">
-      <div class="footer-logo" style="display:flex;align-items:center;gap:12px;">
-        <span style="font-weight:600;font-size:16px;">AlbaSpace</span>
-      </div>
-      <div class="footer-right" style="text-align:right;">
-        <p>&copy; 2025 AlbaSpace. All rights reserved.</p>
-      </div>
-    </div>
-  </footer>
+  <!-- Dinamik footer dahil etme -->
+  <div data-include="/footer-tr.html"></div>
 </body>
 </html>

@@ -1,73 +1,68 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Cart – AlbaSpace</title>
-  <!-- Global site styles -->
+  <title>Sepet – AlbaSpace</title>
+  <!-- Genel site stilleri -->
   <link rel="stylesheet" href="/assets/css/site.css">
   <link rel="stylesheet" href="/assets/css/shop.css">
-  <!-- Include header/footer and menu toggle scripts -->
+  <!-- Başlık/menü eklemeleri -->
   <script src="/assets/js/include.js" defer></script>
   <script src="/assets/js/menu-toggle.js" defer></script>
-  <!-- Cart manager for updating cart state -->
+  <!-- Sepet yöneticisi -->
   <script src="/assets/js/cart.js" defer></script>
 </head>
 <body>
-  <!-- Insert the existing site header (English) -->
-  <div data-include="/header-en.html"></div>
+  <!-- Türkçe site başlığı -->
+  <div data-include="/header-tr.html"></div>
 
   <main class="cart-page">
-    <h1>Cart</h1>
-    <!-- Container for rendered cart items -->
+    <h1>Sepet</h1>
     <section id="cartItems"></section>
-
-    <!-- Cart summary and shipping estimate -->
     <section class="cart-summary" id="cartSummary">
       <div class="cart-total-row">
-        <span>Total:</span>
+        <span>Toplam:</span>
         <span id="cartTotal">$0.00</span>
       </div>
       <div class="shipping-estimate">
-        <h2>Estimate Shipping + Handling</h2>
+        <h2>Kargo + İşlem Ücreti Tahmini</h2>
         <form>
           <label>
-            Country
+            Ülke
             <select>
-              <option value="United States">United States</option>
               <option value="Türkiye">Türkiye</option>
-              <option value="United Kingdom">United Kingdom</option>
-              <option value="Canada">Canada</option>
+              <option value="ABD">Amerika Birleşik Devletleri</option>
+              <option value="Birleşik Krallık">Birleşik Krallık</option>
+              <option value="Kanada">Kanada</option>
             </select>
           </label>
           <label>
-            State / Province
-            <input type="text" placeholder="State or Province">
+            İl / Bölge
+            <input type="text" placeholder="İl veya Bölge">
           </label>
           <label>
-            Zip Code
-            <input type="text" placeholder="Zip or Postal code">
+            Posta Kodu
+            <input type="text" placeholder="Posta Kodu">
           </label>
-          <button type="button" class="btn-secondary">Estimate</button>
+          <button type="button" class="btn-secondary">Tahmin Et</button>
         </form>
       </div>
-      <button class="btn-primary checkout-btn" type="button">CHECKOUT</button>
+      <button class="btn-primary checkout-btn" type="button">ÖDEME</button>
     </section>
-
-    <!-- Message when cart is empty -->
-    <p id="emptyCartMessage" class="cart-empty" hidden>Your cart is empty.</p>
+    <p id="emptyCartMessage" class="cart-empty" hidden>Sepetin boş.</p>
   </main>
 
-  <!-- Insert the existing site footer (English) -->
-  <div data-include="/footer-en.html"></div>
+  <!-- Türkçe site altbilgisi -->
+  <div data-include="/footer-tr.html"></div>
 
   <script>
-    /**
-     * Render the cart contents for the English cart page.  Populates the
-     * #cartItems section with one row per cart item, updates the total,
-     * and attaches event handlers for quantity changes and removal.
+    /*
+     * Türkçe sepet sayfasında sepet içeriğini ekrana basar.  #cartItems
+     * bölümüne her ürün için bir satır ekler, toplam tutarı günceller
+     * ve adet/artır/azalt ile kaldırma düğmelerine olaylar ekler.
      */
-    function renderCartEN() {
+    function renderCartTR() {
       const container = document.getElementById('cartItems');
       const summary = document.getElementById('cartSummary');
       const emptyMsg = document.getElementById('emptyCartMessage');
@@ -85,12 +80,13 @@
       container.innerHTML = cart.map((item, index) => {
         const itemTotal = item.price * item.qty;
         total += itemTotal;
+        const variant = [item.color || '', item.size || ''].filter(Boolean).join(' / ');
         return `
           <article class="cart-item" data-index="${index}">
             <img src="${item.image}" alt="${item.name}">
             <div class="cart-item-main">
               <h2>${item.name}</h2>
-              <p>${item.color ? item.color : ''}${item.size ? ' / ' + item.size : ''}</p>
+              <p>${variant}</p>
               <div class="cart-item-price">$${item.price.toFixed(2)}</div>
             </div>
             <div class="cart-item-actions">
@@ -99,14 +95,14 @@
                 <input type="number" min="1" value="${item.qty}" class="qty-input" data-qty-input>
                 <button type="button" class="qty-btn" data-qty-plus>&plus;</button>
               </div>
-              <button type="button" class="cart-remove" data-remove>Remove</button>
+              <button type="button" class="cart-remove" data-remove>Kaldır</button>
               <div class="cart-item-total">$${itemTotal.toFixed(2)}</div>
             </div>
           </article>
         `;
       }).join('');
       totalEl.textContent = '$' + total.toFixed(2);
-      // Bind event handlers after DOM insertion
+      // Olayları bağla
       container.querySelectorAll('.cart-item').forEach(row => {
         const index = Number(row.dataset.index);
         const input = row.querySelector('[data-qty-input]');
@@ -114,21 +110,21 @@
           const value = Math.max(1, Number(input.value || '1') - 1);
           input.value = value;
           cartManager.updateQty(index, value);
-          renderCartEN();
+          renderCartTR();
         });
         row.querySelector('[data-qty-plus]').addEventListener('click', () => {
           const value = Number(input.value || '1') + 1;
           input.value = value;
           cartManager.updateQty(index, value);
-          renderCartEN();
+          renderCartTR();
         });
         row.querySelector('[data-remove]').addEventListener('click', () => {
           cartManager.remove(index);
-          renderCartEN();
+          renderCartTR();
         });
       });
     }
-    document.addEventListener('DOMContentLoaded', renderCartEN);
+    document.addEventListener('DOMContentLoaded', renderCartTR);
   </script>
 </body>
 </html>
