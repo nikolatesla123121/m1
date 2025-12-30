@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Your Cart – AlbaSpace Shop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --header-bg: #020617;
+      --accent: #00c2ff;
+      --page-bg: #ffffff;
+      --text-main: #111827;
+      --text-muted: #4b5563;
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--page-bg);
+      color: var(--text-main);
+    }
+  </style>
+  <link rel="stylesheet" href="../assets/css/shop.css" />
+  <script src="../assets/js/cart.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="index.html" class="header-logo" style="text-decoration:none;color:inherit;">
+        <span style="font-weight:700;font-size:18px;letter-spacing:0.08em;">AlbaSpace</span>
+      </a>
+      <nav class="main-nav">
+        <a href="index.html">Home</a>
+        <a href="shop.html">Shop</a>
+      </nav>
+      <div class="cart-icon">
+        <a href="cart.html" aria-label="View cart" style="color:inherit;position:relative;display:inline-flex;align-items:center;">
+          <svg viewBox="0 0 24 24" stroke-width="1.6" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 3h2l2.68 10.74a2 2 0 0 0 2 1.54h8.96a2 2 0 0 0 2-1.54L21 6H6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="9" cy="21" r="1" fill="currentColor" />
+            <circle cx="19" cy="21" r="1" fill="currentColor" />
+          </svg>
+          <span class="cart-count">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+  <main class="cart-page">
+    <h1 style="margin-bottom:20px;font-size:28px;">Shopping Cart</h1>
+    <div id="cart-items"></div>
+    <div class="cart-summary" id="cart-summary" style="display:none;">
+      Total: <span class="total" id="cart-total">$0.00</span>
+    </div>
+  </main>
+  <footer class="footer" style="background:var(--header-bg);color:#d1d5db;padding:26px 20px;font-size:13px;">
+    <div class="footer-grid" style="max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">
+      <div class="footer-logo" style="display:flex;align-items:center;gap:12px;">
+        <span style="font-weight:600;font-size:16px;">AlbaSpace</span>
+      </div>
+      <div class="footer-right" style="text-align:right;">
+        <p>&copy; 2025 AlbaSpace. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+  <script>
+    // Render the cart contents into the page
+    function renderCart() {
+      const itemsContainer = document.getElementById('cart-items');
+      const summary = document.getElementById('cart-summary');
+      const totalEl = document.getElementById('cart-total');
+      const cart = cartManager.loadCart();
+      // Empty
+      if (!cart.length) {
+        itemsContainer.innerHTML = '<p class="empty-cart">Your cart is empty</p>';
+        summary.style.display = 'none';
+        return;
+      }
+      // Build list
+      itemsContainer.innerHTML = '';
+      let total = 0;
+      cart.forEach(item => {
+        total += item.price * item.quantity;
+        const row = document.createElement('div');
+        row.className = 'cart-item';
+        row.innerHTML = `
+          <img src="${item.image}" alt="${item.name}" />
+          <div class="item-info">
+            <div class="item-name">${item.name}</div>
+            <div class="item-price">$${item.price.toFixed(2)}</div>
+          </div>
+          <div class="cart-qty-controls">
+            <button class="qty-minus" aria-label="Decrease quantity" data-id="${item.id}">–</button>
+            <span class="qty-number">${item.quantity}</span>
+            <button class="qty-plus" aria-label="Increase quantity" data-id="${item.id}">+</button>
+          </div>
+          <span class="remove-btn" aria-label="Remove item" data-id="${item.id}">&times;</span>
+        `;
+        itemsContainer.appendChild(row);
+      });
+      // Update total
+      totalEl.textContent = '$' + total.toFixed(2);
+      summary.style.display = 'block';
+      // Attach event listeners after DOM insertion
+      itemsContainer.querySelectorAll('.qty-minus').forEach(btn => {
+        btn.addEventListener('click', function () {
+          const id = this.getAttribute('data-id');
+          const cart = cartManager.loadCart();
+          const item = cart.find(i => i.id === id);
+          if (item) {
+            const newQty = item.quantity - 1;
+            cartManager.updateQuantity(id, newQty);
+            renderCart();
+          }
+        });
+      });
+      itemsContainer.querySelectorAll('.qty-plus').forEach(btn => {
+        btn.addEventListener('click', function () {
+          const id = this.getAttribute('data-id');
+          const cart = cartManager.loadCart();
+          const item = cart.find(i => i.id === id);
+          if (item) {
+            cartManager.updateQuantity(id, item.quantity + 1);
+            renderCart();
+          }
+        });
+      });
+      itemsContainer.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+          const id = this.getAttribute('data-id');
+          cartManager.removeFromCart(id);
+          renderCart();
+        });
+      });
+    }
+    document.addEventListener('DOMContentLoaded', renderCart);
+  </script>
+</body>
+</html>
