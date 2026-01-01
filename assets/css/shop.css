@@ -30,8 +30,7 @@
   background: rgba(10, 15, 30, 0.35);
   border: 1px solid rgba(140, 180, 255, 0.22);
   border-radius: 20px;
-  width: 280px;
-  height: 280px;
+  width: 320px;
   overflow: hidden;
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
