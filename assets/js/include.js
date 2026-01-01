@@ -787,3 +787,364 @@ function injectFooterStyles() {
   `;
   document.head.appendChild(s);
 }
+
+/* === ДОБАВЛЕН НОВЫЙ ВИДЖЕТ ALBAMEN С ПАМЯТЬЮ (Cloudflare Worker) === */
+// include.js — Albamen чат-виджета на Cloudflare Workers AI с памятью
+(function () {
+  const WORKER_URL = 'https://divine-flower-a0ae.nncdecdgc.workers.dev';
+
+  // Определяем язык по адресу / html атрибуту
+  function detectLang() {
+    const htmlLang = (document.documentElement.lang || '').toLowerCase();
+    const path = (window.location.pathname || '').toLowerCase();
+
+    if (htmlLang.startsWith('tr') || path.startsWith('/tr') || path.startsWith('/tur')) {
+      return 'tr';
+    }
+    if (htmlLang.startsWith('en') || path.startsWith('/en') || path.startsWith('/eng')) {
+      return 'en';
+    }
+    // По умолчанию — русский
+    return 'ru';
+  }
+
+  const lang = detectLang();
+
+  const STRINGS = {
+    ru: {
+      hello: 'Привет! Я Альбамен 🚀 Как я могу тебе помочь?',
+      placeholder: 'Напиши свой вопрос про космос...',
+      send: 'Отправить',
+      typing: 'Альбамен думает...',
+      error: '⚠️ Ошибка соединения. Попробуй ещё раз.',
+      open: 'Спросить Альбамена',
+      welcomeBackPrefix: 'Снова рад тебя видеть, ',
+      welcomeBackSuffix: '! 🚀',
+    },
+    tr: {
+      hello: 'Merhaba! Ben Albamen 🚀 Sana nasıl yardımcı olabilirim?',
+      placeholder: 'Uzay hakkında sorunu yaz...',
+      send: 'Gönder',
+      typing: 'Albamen düşünüyor...',
+      error: '⚠️ Bağlantı hatası. Lütfen tekrar dene.',
+      open: 'Albamen’e sor',
+      welcomeBackPrefix: 'Tekrar hoş geldin, ',
+      welcomeBackSuffix: '! 🚀',
+    },
+    en: {
+      hello: 'Hi! I\'m Albamen 🚀 How can I help you?',
+      placeholder: 'Ask your question about space...',
+      send: 'Send',
+      typing: 'Albamen is thinking...',
+      error: '⚠️ Connection error. Please try again.',
+      open: 'Ask Albamen',
+      welcomeBackPrefix: 'Welcome back, ',
+      welcomeBackSuffix: '! 🚀',
+    },
+  };
+
+  const S = STRINGS[lang] || STRINGS.ru;
+
+  // Генерация постоянного sessionId
+  function getSessionId() {
+    let id = localStorage.getItem('albamen_session_id');
+    if (!id) {
+      if (window.crypto && crypto.randomUUID) {
+        id = crypto.randomUUID();
+      } else {
+        id = 'sess-' + Date.now() + '-' + Math.random().toString(16).slice(2);
+      }
+      localStorage.setItem('albamen_session_id', id);
+    }
+    return id;
+  }
+
+  const sessionId = getSessionId();
+
+  // Создание DOM виджета
+  function createWidget() {
+    if (document.getElementById('albamen-widget-root')) return;
+
+    const root = document.createElement('div');
+    root.id = 'albamen-widget-root';
+    root.style.position = 'fixed';
+    root.style.zIndex = '99999';
+    root.style.bottom = '20px';
+    root.style.right = '20px';
+    root.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+
+    // Кнопка открытия
+    const openBtn = document.createElement('button');
+    openBtn.type = 'button';
+    openBtn.textContent = S.open;
+    openBtn.style.borderRadius = '999px';
+    openBtn.style.border = 'none';
+    openBtn.style.padding = '10px 16px';
+    openBtn.style.background = '#111827';
+    openBtn.style.color = '#fff';
+    openBtn.style.cursor = 'pointer';
+    openBtn.style.boxShadow = '0 10px 30px rgba(0,0,0,0.35)';
+    openBtn.style.display = 'flex';
+    openBtn.style.alignItems = 'center';
+    openBtn.style.gap = '8px';
+    openBtn.style.fontSize = '14px';
+
+    const rocketSpan = document.createElement('span');
+    rocketSpan.textContent = '🚀';
+    openBtn.prepend(rocketSpan);
+
+    // Панель чата
+    const panel = document.createElement('div');
+    panel.style.position = 'absolute';
+    panel.style.bottom = '60px';
+    panel.style.right = '0';
+    panel.style.width = '320px';
+    panel.style.maxHeight = '420px';
+    panel.style.background = '#0b1120';
+    panel.style.borderRadius = '16px';
+    panel.style.boxShadow = '0 18px 40px rgba(15,23,42,0.7)';
+    panel.style.color = '#e5e7eb';
+    panel.style.display = 'none';
+    panel.style.flexDirection = 'column';
+    panel.style.overflow = 'hidden';
+
+    // Шапка
+    const header = document.createElement('div');
+    header.style.padding = '10px 12px';
+    header.style.display = 'flex';
+    header.style.alignItems = 'center';
+    header.style.justifyContent = 'space-between';
+    header.style.borderBottom = '1px solid rgba(148,163,184,0.35)';
+
+    const title = document.createElement('div');
+    title.style.display = 'flex';
+    title.style.flexDirection = 'column';
+
+    const titleMain = document.createElement('div');
+    titleMain.textContent = 'Albamen';
+    titleMain.style.fontWeight = '600';
+    titleMain.style.fontSize = '14px';
+
+    const titleSub = document.createElement('div');
+    titleSub.textContent =
+      lang === 'tr'
+        ? 'Senin uzay süper kahraman asistanın'
+        : lang === 'en'
+        ? 'Your space superhero assistant'
+        : 'Твой космический супергерой-ассистент';
+    titleSub.style.fontSize = '11px';
+    titleSub.style.color = '#9ca3af';
+
+    title.appendChild(titleMain);
+    title.appendChild(titleSub);
+
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.textContent = '✕';
+    closeBtn.style.border = 'none';
+    closeBtn.style.background = 'transparent';
+    closeBtn.style.color = '#9ca3af';
+    closeBtn.style.cursor = 'pointer';
+    closeBtn.style.fontSize = '14px';
+    closeBtn.style.padding = '4px';
+
+    header.appendChild(title);
+    header.appendChild(closeBtn);
+
+    // Список сообщений
+    const messagesWrap = document.createElement('div');
+    messagesWrap.style.flex = '1';
+    messagesWrap.style.padding = '10px';
+    messagesWrap.style.overflowY = 'auto';
+    messagesWrap.style.fontSize = '13px';
+    messagesWrap.style.display = 'flex';
+    messagesWrap.style.flexDirection = 'column';
+    messagesWrap.style.gap = '8px';
+
+    // Строка статуса
+    const status = document.createElement('div');
+    status.style.fontSize = '11px';
+    status.style.color = '#9ca3af';
+    status.style.padding = '4px 10px 0 10px';
+    status.style.display = 'none';
+    status.textContent = S.typing;
+
+    // Форма ввода
+    const form = document.createElement('form');
+    form.style.display = 'flex';
+    form.style.alignItems = 'center';
+    form.style.gap = '6px';
+    form.style.padding = '8px 10px 10px 10px';
+    form.style.borderTop = '1px solid rgba(148,163,184,0.35)';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = S.placeholder;
+    input.style.flex = '1';
+    input.style.borderRadius = '999px';
+    input.style.border = '1px solid rgba(148,163,184,0.5)';
+    input.style.background = 'rgba(15,23,42,0.85)';
+    input.style.color = '#e5e7eb';
+    input.style.fontSize = '13px';
+    input.style.padding = '6px 10px';
+    input.style.outline = 'none';
+
+    const sendBtn = document.createElement('button');
+    sendBtn.type = 'submit';
+    sendBtn.textContent = S.send;
+    sendBtn.style.borderRadius = '999px';
+    sendBtn.style.border = 'none';
+    sendBtn.style.background = '#2563eb';
+    sendBtn.style.color = '#fff';
+    sendBtn.style.padding = '6px 10px';
+    sendBtn.style.fontSize = '12px';
+    sendBtn.style.cursor = 'pointer';
+
+    form.appendChild(input);
+    form.appendChild(sendBtn);
+
+    // Собираем панель
+    panel.appendChild(header);
+    panel.appendChild(messagesWrap);
+    panel.appendChild(status);
+    panel.appendChild(form);
+
+    root.appendChild(panel);
+    root.appendChild(openBtn);
+    document.body.appendChild(root);
+
+    // --- Вспомогательная функция добавления сообщения ---
+    function addMessage(text, from) {
+      const bubble = document.createElement('div');
+      bubble.style.maxWidth = '85%';
+      bubble.style.padding = '6px 9px';
+      bubble.style.borderRadius = '10px';
+      bubble.style.fontSize = '13px';
+      bubble.style.whiteSpace = 'pre-wrap';
+
+      if (from === 'user') {
+        bubble.style.alignSelf = 'flex-end';
+        bubble.style.background = '#1d4ed8';
+        bubble.style.color = '#f9fafb';
+      } else {
+        bubble.style.alignSelf = 'flex-start';
+        bubble.style.background = '#020617';
+        bubble.style.border = '1px solid rgba(148,163,184,0.4)';
+        bubble.style.color = '#e5e7eb';
+      }
+
+      bubble.textContent = text;
+      messagesWrap.appendChild(bubble);
+      messagesWrap.scrollTop = messagesWrap.scrollHeight;
+    }
+
+    // Приветствие
+    const storedName = localStorage.getItem('albamen_user_name');
+    if (storedName) {
+      addMessage(
+        (S.welcomeBackPrefix || '') +
+          storedName +
+          (S.welcomeBackSuffix || ''),
+        'bot'
+      );
+    } else {
+      addMessage(S.hello, 'bot');
+    }
+
+    // --- Обработчики открытия/закрытия ---
+    openBtn.addEventListener('click', () => {
+      if (panel.style.display === 'none') {
+        panel.style.display = 'flex';
+        input.focus();
+      } else {
+        panel.style.display = 'none';
+      }
+    });
+
+    closeBtn.addEventListener('click', () => {
+      panel.style.display = 'none';
+    });
+
+    // --- Отправка сообщения ---
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      sendMessage();
+    });
+
+    function sendMessage() {
+      const txt = (input.value || '').trim();
+      if (!txt) return;
+
+      addMessage(txt, 'user');
+      input.value = '';
+      input.focus();
+
+      status.textContent = S.typing;
+      status.style.display = 'block';
+
+      const currentName =
+        localStorage.getItem('albamen_user_name') || null;
+      const currentAge =
+        localStorage.getItem('albamen_user_age') || null;
+
+      fetch(WORKER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: txt,
+          sessionId,
+          savedName: currentName,
+          savedAge: currentAge,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          status.style.display = 'none';
+
+          if (!data || typeof data.reply !== 'string') {
+            addMessage(S.error, 'bot');
+            return;
+          }
+
+          // Сохраняем имя / возраст, если воркер их прислал
+          if (data.saveName && typeof data.saveName === 'string') {
+            const newName = data.saveName.trim();
+            if (newName) {
+              localStorage.setItem('albamen_user_name', newName);
+            }
+          }
+          if (data.saveAge && typeof data.saveAge === 'string') {
+            const newAge = data.saveAge.trim();
+            if (newAge) {
+              localStorage.setItem('albamen_user_age', newAge);
+            }
+          }
+
+          // Воркер уже вычистил все служебные теги, здесь только показываем текст
+          const finalReply = data.reply.trim();
+          addMessage(finalReply || S.error, 'bot');
+        })
+        .catch((err) => {
+          console.error('Albamen error:', err);
+          status.style.display = 'none';
+          addMessage(S.error, 'bot');
+        });
+    }
+  }
+
+  function init() {
+    try {
+      createWidget();
+    } catch (e) {
+      console.error('Albamen widget init error:', e);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+
+
