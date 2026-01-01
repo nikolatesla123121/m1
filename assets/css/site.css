@@ -59,8 +59,7 @@ body{
   position:relative;
 }
 
-/* Hide SHOP and DFS from header menu */
-.main-nav a[href="/shop.html"],
+/* Hide DFS and BLOG from header menu (keep SHOP visible) */
 .main-nav a[href="/dfs.html"],
 .main-nav a[href="/blog.html"]{
   display:none !important;
