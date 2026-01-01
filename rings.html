@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AR Try-On v12 (Ring Finger Fix)</title>
+    <title>AR Try-On v13 (Calibrated Fix)</title>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #000; font-family: sans-serif; }
         
@@ -109,7 +109,6 @@
             }, undefined, (error) => {
                 console.log("Fallback mode");
                 isFallback = true;
-                // Сделал бублик чуть толще и заметнее
                 const geo = new THREE.TorusGeometry(0.15, 0.03, 16, 32);
                 const mat = new THREE.MeshStandardMaterial({ color: 0xFFD700, metalness: 0.8, roughness: 0.2 });
                 currentRing = new THREE.Mesh(geo, mat);
@@ -143,21 +142,18 @@
                 }
                 
                 const landmarks = results.multiHandLandmarks[0];
-                
-                // === ЦЕЛЕВОЙ ПАЛЕЦ: БЕЗЫМЯННЫЙ ===
-                // 13 = MCP (Костяшка кулака)
-                // 14 = PIP (Первый сгиб пальца)
                 const p13 = landmarks[13]; 
                 const p14 = landmarks[14]; 
 
                 if (currentRing) {
-                    // === НАСТРОЙКА ПОЗИЦИИ (Точная) ===
-                    // В этот раз используем маленькие значения для калибровки
+                    // === НАСТРОЙКА ПОЗИЦИИ (ИСПРАВЛЕНО) ===
+                    // Я увеличил эти значения, чтобы сдвинуть кольцо
                     
-                    const moveUp = 0.0;   // 0.0 - это центр. Если нужно выше, ставьте 0.2
-                    const moveLeft = 0.0; // 0.0 - это центр. Если нужно влево, ставьте 0.1
+                    const moveUp = 0.3;   // Поднимаем вверх
+                    const moveLeft = 0.15; // Сдвигаем влево
                     
-                    // Расчет координат
+                    // -------------------------------------
+
                     const x = (p13.x + p14.x) / 2;
                     const y = (p13.y + p14.y) / 2;
 
