@@ -673,7 +673,7 @@ body{
    ========================= */
 
 footer.footer{
-  background:#111827;
+  background: var(--header-bg);
   color:#d1d5db;
   padding:26px 20px;
   font-size:13px;
