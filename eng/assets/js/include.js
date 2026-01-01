@@ -537,11 +537,11 @@ function enhanceFooter(root) {
 
   const phoneBtn = document.createElement('a');
   phoneBtn.className = 'alba-footer-action';
-  phoneBtn.href = 'tel:+9053877818';
+  phoneBtn.href = 'tel:+905387781018';
   phoneBtn.innerHTML = `
     <div class="action-row">
       <span class="action-icon">☎</span>
-      <span class="action-text">+90 538 778 18</span>
+      <span class="action-text">+90 538 778 10 18</span>
     </div>
     <div class="action-hint alba-blink">Tap to call</div>
   `;
@@ -617,11 +617,11 @@ function findPhone(text) {
 
 function escapeHtml(str) {
   return String(str || "")
-    .replaceAll("&", "&")
-    .replaceAll("<", "<")
-    .replaceAll(">", ">")
-    .replaceAll('"', """)
-    .replaceAll("'", "'");
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 function injectFooterStyles() {
@@ -833,3 +833,10 @@ function injectFooterStyles() {
       inputField.focus();
     });
   }
+
+
+
+
+injectAiWidget();  // вызов, чтобы код сработал
+
+});  // закрывает runAfterDomReady(() => { ... })
