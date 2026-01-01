@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AR Try-On v11 (Calibrated)</title>
+    <title>AR Try-On v10 (Small Ring)</title>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #000; font-family: sans-serif; }
         
@@ -68,7 +68,7 @@
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-        // ИМЕНА ВАШИХ ФАЙЛОВ
+        // ИМЕНА ВАШИХ ФАЙЛОВ (Должны лежать рядом с html)
         const models = ['ring_01.glb', 'ring_02.glb', 'ring_03.glb'];
         
         const videoElement = document.getElementById('input_video');
@@ -105,18 +105,22 @@
 
             loader.load(models[index], (gltf) => {
                 currentRing = gltf.scene;
-                // Масштаб модели
+                // Масштаб для реальной модели (меняйте цифры здесь, если ваше кольцо будет большим/маленьким)
                 currentRing.scale.set(10, 10, 10); 
                 scene.add(currentRing);
             }, undefined, (error) => {
                 console.log("Файл не найден, создаю маленький бублик");
                 isFallback = true;
                 
-                // Fallback (Заглушка)
+                // --- ИСПРАВЛЕНИЕ: Делаем бублик ОЧЕНЬ маленьким и поворачиваем его ---
+                // Radius: 0.12 (был 0.6)
                 const geo = new THREE.TorusGeometry(0.12, 0.02, 16, 32);
                 const mat = new THREE.MeshStandardMaterial({ color: 0xFFD700, metalness: 0.8, roughness: 0.2 });
                 currentRing = new THREE.Mesh(geo, mat);
-                currentRing.rotation.x = Math.PI / 2; // Поворот заглушки
+                
+                // Сразу поворачиваем геометрию на 90 градусов
+                currentRing.rotation.x = Math.PI / 2;
+                
                 scene.add(currentRing);
             });
         }
@@ -150,34 +154,28 @@
                 const p14 = landmarks[14]; // PIP (Первый сгиб)
 
                 if (currentRing) {
-                    // --- КАЛИБРОВКА (НАСТРОЙКА ПОЗИЦИИ) ---
-                    // Изменяйте эти цифры, если хотите подвинуть кольцо
-                    
-                    const moveUp = 1.5;   // Насколько поднять вверх (к кончику пальца)
-                    const moveLeft = 0.5; // Насколько подвинуть влево
-                    
-                    // -------------------------------------
-
+                    // Координаты
                     const x = (p13.x + p14.x) / 2;
                     const y = (p13.y + p14.y) / 2;
-
-                    // Применяем калибровку
-                    // Мы вычитаем moveLeft из X (движение влево)
-                    const screenX = ((x - 0.5) * 10) - moveLeft; 
-                    
-                    // Мы прибавляем moveUp к Y (движение вверх)
-                    const screenY = (-(y - 0.5) * 10) + moveUp;
-                    
+                    const screenX = (x - 0.5) * 10; 
+                    const screenY = -(y - 0.5) * 10;
                     const screenZ = -5;
-                    
                     currentRing.position.set(screenX, screenY, screenZ);
 
-                    // Вращение
+                    // Вращение (чтобы кольцо поворачивалось вместе с пальцем)
                     const dx = p14.x - p13.x;
                     const dy = p14.y - p13.y;
                     const angle = Math.atan2(dy, dx);
                     
+                    // Поворот вокруг оси Z (влево-вправо)
+                    // Коррекция -Math.PI/2 нужна, чтобы выровнять кольцо вдоль пальца
                     currentRing.rotation.z = angle - Math.PI / 2;
+                    
+                    // Поворот вокруг оси X (наклон)
+                    // Для "бублика" мы это уже сделали при создании.
+                    // Если вы загрузите реальную модель и она будет стоять боком, 
+                    // раскомментируйте строчку ниже:
+                    // if (!isFallback) currentRing.rotation.x = Math.PI / 2;
                 }
             }
             renderer.render(scene, camera3D);
