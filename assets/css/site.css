@@ -716,6 +716,13 @@ footer.footer{
   color:#e5e7eb;
 }
 
+.footer-left{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+  align-items:flex-start;
+}
+
 /* НОВОЕ: выравниваем копирайт по центру на всех языках */
 .footer-bottom{
   text-align:center;
@@ -778,6 +785,14 @@ footer.footer{
   align-items:start;
 }
 
+.footer-actions--contact,
+.footer-actions--offices{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+  align-items:start;
+}
+
 .footer-action{
   display:block;
   padding:10px 12px;
@@ -810,6 +825,10 @@ footer.footer{
   .footer-logo img{ width:52px; height:52px; padding:4px }
   .footer-logo p{ font-size:14px }
 
+  .footer-left{
+    align-items:center;
+  }
+
   .footer-social{ justify-content:center; gap:16px }
   .footer-social img{ width:84px; height:84px; border-radius:24px }
 
@@ -824,53 +843,10 @@ footer.footer{
   footer.footer{ padding:22px 12px }
 }
 
-/* FOOTER TR: mobile centering and vertical socials */
-@media (max-width:768px){
-  .footer--tr .footer-right{
-    width:100%;
-    justify-items:center;
-  }
-  .footer--tr .footer-logo{
-    align-items:center;
-    text-align:center;
-  }
-  .footer--tr .footer-social--grid{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-  }
-  .footer--tr .footer-actions{
-    width:100%;
-    grid-template-columns:1fr;
-  }
-}
-
-/* Desktop: move footer action buttons into a single horizontal row on larger screens */
+/* Desktop: align footer items */
 @media (min-width:769px){
   .footer-grid{
     align-items:center;
-  }
-  .footer--tr .footer-right{
-    justify-items:end;
-  }
-  .footer--tr .footer-social--grid{
-    grid-template-columns:repeat(2, auto);
-    justify-items:end;
-  }
-  .footer--tr .footer-actions{
-    display:grid;
-    grid-template-columns:repeat(2, minmax(0,1fr));
-    width:100%;
-    max-width:640px;
-  }
-  .footer-actions{
-    display:flex;
-    flex-direction:row;
-    gap:16px;
-    align-items:center;
-    justify-content:flex-end; /* right-align actions inside their grid cell */
-    width:100%;
-    grid-template-columns:none;
   }
   .footer-action{ padding:10px 14px; }
 }
@@ -1390,6 +1366,17 @@ model-viewer{
   text-align:left;
 }
 
+/* ===== Footer layout: 3 columns ===== */
+.footer-grid.footer-grid--3{
+  max-width:1200px;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns: 1fr auto auto;
+  gap:26px;
+  align-items:start;
+  text-align:left;
+}
+
 /* ===== Social icons: square + x3 ===== */
 .footer-social.vertical.footer-social--xl{
   display:flex;
@@ -1506,6 +1493,7 @@ model-viewer{
 /* mobile */
 @media (max-width:768px){
   .footer-grid.footer-grid--2{ grid-template-columns:1fr; }
+  .footer-grid.footer-grid--3{ grid-template-columns:1fr; }
   .footer-actions{ grid-template-columns:1fr; }
 }
 
