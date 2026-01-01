@@ -187,13 +187,13 @@ body{
 .ai-floating,
 .ai-floating.footer-docked {
   position: fixed;
+  top: 20px;
   right: 20px;
-  bottom: 20px;
   z-index: 1100;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 10px; /* Расстояние между картинкой и кнопкой вызова */
+  gap: 10px; /* Расстояние между элементами */
 }
 
 /* 1. Картинка-аватар (Albamen) */
