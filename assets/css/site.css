@@ -42,8 +42,9 @@ body{
    ========================= */
 
 .site-header{
-  background:#020617;
-  color:#e5e7eb;
+  /* Match footer background and text color for visual consistency */
+  background:#111827;
+  color:#d1d5db;
   border-bottom:1px solid #0f172a;
 }
 
