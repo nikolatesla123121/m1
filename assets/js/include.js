@@ -385,126 +385,134 @@ runAfterDomReady(() => {
     }
   }
 
-  // === Голосовой виджет (кнопка + модалка + подключение script.js) ===
-  function injectVoiceWidget() {
-    const path = window.location.pathname || '/';
-    const isEn = path.startsWith('/eng/');
-    const t = isEn ? {
-      btnAria: 'Voice chat',
-      talkPrompt: 'Tap and Talk 🔊',
-      connecting: 'Connecting...',
-      listening: 'Listening...',
-      modalTitle: 'Let’s meet! 👋',
-      modalSubtitle: 'Albamen wants to know your name and age.',
-      namePlaceholder: 'Your name?',
-      agePlaceholder: 'Your age?',
-      cancel: 'Cancel',
-      start: 'Start 🚀',
-      stop: 'Stop',
-      error: 'Voice not supported'
-    } : {
-      btnAria: 'Sesli sohbet',
-      talkPrompt: 'Tıkla ve Konuş 🔊',
-      connecting: 'Bağlanıyor...',
-      listening: 'Dinliyorum...',
-      modalTitle: 'Tanışalım! 👋',
-      modalSubtitle: 'Albamen seninle daha iyi konuşmak için adını ve yaşını bilmek istiyor.',
-      namePlaceholder: 'Adın ne?',
-      agePlaceholder: 'Yaşın kaç?',
-      cancel: 'İptal',
-      start: 'Başла 🚀',
-      stop: 'Durdur',
-      error: 'Ses desteği yok'
-    };
+function injectVoiceWidget() {
+  const path = window.location.pathname || '/';
+  const isEn = path.startsWith('/eng/');
 
-    // Инъекция CSS для голосового виджета
-    if (!document.getElementById('ai-voice-style')) {
-      const style = document.createElement('style');
-      style.id = 'ai-voice-style';
-      style.textContent = `
-        .ai-voice-btn { width: 52px; height: 52px; border-radius: 999px; background: #020617; border: 2px solid rgba(148, 163, 184, 0.6); color: #e5e7eb; display: grid; place-items: center; cursor: pointer; box-shadow: 0 14px 35px rgba(15, 23, 42, 0.75); transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease; }
-        .ai-voice-btn:hover { transform: translateY(-1px) scale(1.05); background: radial-gradient(circle at 30% 0%, #0ea5e9, #020617 60%); border-color: rgba(56, 189, 248, 0.9); box-shadow: 0 20px 40px rgba(8, 47, 73, 0.9); }
-        .ai-panel-voice { position: fixed; right: 20px; bottom: 20px; width: 340px; max-width: 95vw; height: 360px; background: #020617; color: #e5e7eb; border-radius: 24px; box-shadow: 0 22px 55px rgba(15, 23, 42, 0.85); display: flex; flex-direction: column; overflow: hidden; transform: translateY(18px) scale(0.96); opacity: 0; pointer-events: none; transition: transform .26s cubic-bezier(.16,1,.3,1), opacity .26s ease; z-index: 1205; }
-        .ai-panel-voice.ai-open { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
-        .ai-panel-voice .ai-panel-body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 10px; height: 100%; }
-        .ai-panel-voice .ai-status-text { font-size: 12px; color: #9ca3af; text-align: center; min-height: 18px; }
-        .ai-panel-voice .ai-chat-avatar-large { margin: 0 auto 4px; }
-        .voice-controls { margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 12px; }
-        .voice-wave { display: flex; gap: 4px; align-items: flex-end; }
-        .voice-wave.hidden { display: none !important; }
-        .voice-bar { width: 4px; border-radius: 999px; background: #22c55e; animation: voiceWave 1.2s ease-in-out infinite; }
-        .voice-bar:nth-child(2) { animation-delay: .12s; }
-        .voice-bar:nth-child(3) { animation-delay: .24s; }
-        @keyframes voiceWave { 0%,100% { height: 6px; } 50% { height: 20px; } }
-        .voice-stop-btn { width: 34px; height: 34px; border-radius: 999px; border: none; cursor: pointer; display: grid; place-items: center; background: #ef4444; color: #fee2e2; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); animation: pulseStop 1.4s infinite; }
-        .voice-stop-btn.hidden { display: none !important; }
-        @keyframes pulseStop { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); } 70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
-        .ai-glow { box-shadow: 0 0 14px rgba(56, 189, 248, 0.8), 0 0 32px rgba(59, 130, 246, 0.8); animation: aiGlow 1.2s ease-in-out infinite; }
-        @keyframes aiGlow { 0%,100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.7), 0 0 24px rgba(56, 189, 248, 0.5); } 50% { box-shadow: 0 0 24px rgba(56, 189, 248, 1), 0 0 42px rgba(37, 99, 235, 0.9); } }
-      `;
-      document.head.appendChild(style);
-    }
+  const t = isEn ? {
+    btnAria: 'Voice chat',
+    talkPrompt: 'Tap and Talk 🔊',
+    connecting: 'Connecting...',
+    listening: 'Listening...',
+    modalTitle: 'Let’s meet! 👋',
+    modalSubtitle: 'Albamen wants to know your name and age.',
+    namePlaceholder: 'Your name?',
+    agePlaceholder: 'Your age?',
+    cancel: 'Cancel',
+    start: 'Start 🚀',
+    stop: 'Stop',
+    error: 'Voice not supported',
+    welcomeBackPrefix: 'Welcome back, ',
+    welcomeBackSuffix: '! 🚀',
+  } : {
+    btnAria: 'Sesli sohbet',
+    talkPrompt: 'Tıkla ve Konuş 🔊',
+    connecting: 'Bağlanıyor...',
+    listening: 'Dinliyorum...',
+    modalTitle: 'Tanışalım! 👋',
+    modalSubtitle: 'Albamen seninle daha iyi konuşmak için adını ve yaşını bilmek istiyor.',
+    namePlaceholder: 'Adın ne?',
+    agePlaceholder: 'Yaşın kaç?',
+    cancel: 'İptal',
+    start: 'Başla 🚀',
+    stop: 'Durdur',
+    error: 'Ses desteği yok',
+    welcomeBackPrefix: 'Tekrar hoş geldin, ',
+    welcomeBackSuffix: '! 🚀',
+  };
 
-    if (document.getElementById('ai-voice-btn')) return;
+  // ⚡ Берём общую идентичность (sessionId + имя/возраст)
+  const identity = getAlbamenIdentity();
 
-    const floating = document.getElementById('ai-floating-global');
-    if (!floating) return;
+  // Пробросим её глобально, чтобы script.js мог использовать
+  window.albamenVoiceIdentity = identity;
 
-    const avatarSrc = '/assets/images/albamenai.jpg';
-
-    // Кнопка голосового вызова
-    const voiceBtn = document.createElement('button');
-    voiceBtn.className = 'ai-voice-btn';
-    voiceBtn.id = 'ai-voice-btn';
-    voiceBtn.setAttribute('aria-label', t.btnAria);
-    voiceBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>';
-    floating.appendChild(voiceBtn);
-
-    // Модальное окно голосового чата
-    const voicePanel = document.createElement('div');
-    voicePanel.id = 'ai-panel-voice';
-    voicePanel.className = 'ai-panel-voice';
-    voicePanel.innerHTML = `
-      <div class="ai-panel-header">
-        <button class="ai-close-icon" id="ai-voice-close-btn">×</button>
-      </div>
-      <div class="ai-panel-body">
-        <div class="ai-chat-avatar-large"><img src="${avatarSrc}" alt="Albamen"></div>
-        <div class="ai-status-text" id="voice-status-text">${t.talkPrompt}</div>
-        <div class="voice-controls">
-          <div class="voice-wave hidden" id="voice-wave">
-            <div class="voice-bar"></div><div class="voice-bar"></div><div class="voice-bar"></div>
-          </div>
-          <button class="voice-stop-btn hidden" id="voice-stop-btn">■</button>
-        </div>
-      </div>
+  // Инъекция CSS для голосового виджета
+  if (!document.getElementById('ai-voice-style')) {
+    const style = document.createElement('style');
+    style.id = 'ai-voice-style';
+    style.textContent = `
+      .ai-voice-btn { width: 52px; height: 52px; border-radius: 999px; background: #020617; border: 2px solid rgba(148, 163, 184, 0.6); color: #e5e7eb; display: grid; place-items: center; cursor: pointer; box-shadow: 0 14px 35px rgba(15, 23, 42, 0.75); transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease; }
+      .ai-voice-btn:hover { transform: translateY(-1px) scale(1.05); background: radial-gradient(circle at 30% 0%, #0ea5e9, #020617 60%); border-color: rgba(56, 189, 248, 0.9); box-shadow: 0 20px 40px rgba(8, 47, 73, 0.9); }
+      .ai-panel-voice { position: fixed; right: 20px; bottom: 20px; width: 340px; max-width: 95vw; height: 360px; background: #020617; color: #e5e7eb; border-radius: 24px; box-shadow: 0 22px 55px rgba(15, 23, 42, 0.85); display: flex; flex-direction: column; overflow: hidden; transform: translateY(18px) scale(0.96); opacity: 0; pointer-events: none; transition: transform .26s cubic-bezier(.16,1,.3,1), opacity .26s ease; z-index: 1205; }
+      .ai-panel-voice.ai-open { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
+      .ai-panel-voice .ai-panel-body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 10px; height: 100%; }
+      .ai-panel-voice .ai-status-text { font-size: 12px; color: #9ca3af; text-align: center; min-height: 18px; }
+      .ai-panel-voice .ai-chat-avatar-large { margin: 0 auto 4px; }
+      .voice-controls { margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 12px; }
+      .voice-wave { display: flex; gap: 4px; align-items: flex-end; }
+      .voice-wave.hidden { display: none !important; }
+      .voice-bar { width: 4px; border-radius: 999px; background: #22c55e; animation: voiceWave 1.2s ease-in-out infinite; }
+      .voice-bar:nth-child(2) { animation-delay: .12s; }
+      .voice-bar:nth-child(3) { animation-delay: .24s; }
+      @keyframes voiceWave { 0%,100% { height: 6px; } 50% { height: 20px; } }
+      .voice-stop-btn { width: 34px; height: 34px; border-radius: 999px; border: none; cursor: pointer; display: grid; place-items: center; background: #ef4444; color: #fee2e2; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); animation: pulseStop 1.4s infinite; }
+      .voice-stop-btn.hidden { display: none !important; }
+      @keyframes pulseStop { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); } 70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+      .ai-glow { box-shadow: 0 0 14px rgba(56, 189, 248, 0.8), 0 0 32px rgba(59, 130, 246, 0.8); animation: aiGlow 1.2s ease-in-out infinite; }
+      @keyframes aiGlow { 0%,100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.7), 0 0 24px rgba(56, 189, 248, 0.5); } 50% { box-shadow: 0 0 24px rgba(56, 189, 248, 1), 0 0 42px rgba(37, 99, 235, 0.9); } }
     `;
-    document.body.appendChild(voicePanel);
-
-    // === ПОДКЛЮЧЕНИЕ script.js (логика голоса) ===
-    if (!document.getElementById('albamen-voice-script')) {
-      const voiceScript = document.createElement('script');
-      voiceScript.src = '/assets/js/script.js';
-      voiceScript.id = 'albamen-voice-script';
-      voiceScript.defer = true;
-      document.body.appendChild(voiceScript);
-    }
+    document.head.appendChild(style);
   }
 
-  function ensureAiWidgetPinned() {
-    const floating = document.getElementById('ai-floating-global');
-    if (!floating) return;
-    const keepInBody = () => {
-      if (floating.parentElement !== document.body) {
-        document.body.appendChild(floating);
-      }
-      floating.classList.remove('footer-docked');
-    };
-    keepInBody();
-    const observer = new MutationObserver(() => keepInBody());
-    observer.observe(document.body, { childList: true, subtree: true });
+  if (document.getElementById('ai-voice-btn')) return;
+
+  const floating = document.getElementById('ai-floating-global');
+  if (!floating) return;
+
+  const avatarSrc = '/assets/images/albamenai.jpg';
+
+  // Кнопка голосового вызова
+  const voiceBtn = document.createElement('button');
+  voiceBtn.className = 'ai-voice-btn';
+  voiceBtn.id = 'ai-voice-btn';
+  voiceBtn.setAttribute('aria-label', t.btnAria);
+  voiceBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>';
+  floating.appendChild(voiceBtn);
+
+  // Модальное окно голосового чата
+  const voicePanel = document.createElement('div');
+  voicePanel.id = 'ai-panel-voice';
+  voicePanel.className = 'ai-panel-voice';
+  voicePanel.innerHTML = `
+    <div class="ai-panel-header">
+      <button class="ai-close-icon" id="ai-voice-close-btn">×</button>
+    </div>
+    <div class="ai-panel-body">
+      <div class="ai-chat-avatar-large"><img src="${avatarSrc}" alt="Albamen"></div>
+      <div class="ai-status-text" id="voice-status-text"></div>
+      <div class="voice-controls">
+        <div class="voice-wave hidden" id="voice-wave">
+          <div class="voice-bar"></div><div class="voice-bar"></div><div class="voice-bar"></div>
+        </div>
+        <button class="voice-stop-btn hidden" id="voice-stop-btn">■</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(voicePanel);
+
+  const statusEl = document.getElementById('voice-status-text');
+
+  // Если уже знаем имя — показываем "welcome back", иначе дефолтный prompt
+  if (identity.name) {
+    statusEl.textContent = (t.welcomeBackPrefix || '') + identity.name + (t.welcomeBackSuffix || '');
+  } else {
+    statusEl.textContent = t.talkPrompt;
   }
+
+  // === ПОДКЛЮЧЕНИЕ script.js (логика голоса) ===
+  if (!document.getElementById('albamen-voice-script')) {
+    const voiceScript = document.createElement('script');
+    voiceScript.src = '/assets/js/script.js';
+    voiceScript.id = 'albamen-voice-script';
+    voiceScript.defer = true;
+    document.body.appendChild(voiceScript);
+  }
+}
 }); // END runAfterDomReady
+
+
+
 
 // -------------------- HELPER FUNCTIONS --------------------
 function runAfterDomReady(fn) {
@@ -819,4 +827,13 @@ function getAlbamenSessionId() {
     localStorage.setItem('albamen_session_id', id);
   }
   return id;
+}
+
+
+function getAlbamenIdentity() {
+  return {
+    sessionId: getAlbamenSessionId(),
+    name: localStorage.getItem('albamen_user_name') || null,
+    age: localStorage.getItem('albamen_user_age') || null,
+  };
 }
