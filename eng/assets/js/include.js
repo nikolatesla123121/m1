@@ -520,14 +520,14 @@ function enhanceFooter(root) {
   const socials = footer.querySelector(".social-icons") || footer.querySelector(".footer-socials") || footer.querySelector("[data-socials]");
   if (socials) socials.classList.add("alba-footer-socials");
 
-  const addressContainer = footer.querySelector(".footer-right") || footer.querySelector(".footer-address") || footer.querySelector(".footer-contact") || footer.querySelector("[data-footer-address]");
+  const addressContainer = footer.querySelector(".footer-actions") || footer.querySelector(".footer-right") || footer.querySelector(".footer-address") || footer.querySelector(".footer-contact") || footer.querySelector("[data-footer-address]");
   if (!addressContainer) return;
 
   const rawAddrText = (addressContainer.innerText || "").trim();
   if (!rawAddrText) return;
 
-  const merkezBlock = extractSection(rawAddrText, /Merkez Ofis/i, /Adana Şube/i);
-  const adanaBlock = extractSection(rawAddrText, /Adana Şube/i, null);
+  const merkezBlock = extractSection(rawAddrText, /Head Office/i, /Branch Office/i);
+  const adanaBlock = extractSection(rawAddrText, /Branch Office/i, null);
 
   const mailAnchors = footer.querySelectorAll('a[href^="mailto:"]');
   mailAnchors.forEach((el) => el.remove());
@@ -559,8 +559,8 @@ function enhanceFooter(root) {
   `;
   contactPanel.appendChild(emailBtn);
 
-  const map1 = buildMapButton(merkezBlock);
-  const map2 = buildMapButton(adanaBlock);
+  const map1 = buildMapButton(merkezBlock, 'Tap to open map');
+  const map2 = buildMapButton(adanaBlock, 'Tap to open map');
   if (map1) contactPanel.appendChild(map1);
   if (map2) contactPanel.appendChild(map2);
 
@@ -574,7 +574,7 @@ function enhanceFooter(root) {
   addressContainer.appendChild(contactPanel);
 }
 
-function buildMapButton(blockText) {
+function buildMapButton(blockText, hint) {
   if (!blockText) return null;
   const lines = blockText.split('\n').map((s) => s.trim()).filter(Boolean);
   if (!lines.length) return null;
@@ -587,14 +587,13 @@ function buildMapButton(blockText) {
   a.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address);
   a.target = '_blank';
   a.rel = 'noopener';
-  const hintEn = 'Tap to open map';
   a.innerHTML = `
     <div class="action-row">
       <span class="action-icon">📍</span>
       <span class="action-text">${escapeHtml(title)}</span>
     </div>
     <div class="map-address">${escapeHtml(address)}</div>
-    <div class="action-hint alba-blink">${hintEn}</div>
+    <div class="action-hint alba-blink">${escapeHtml(hint)}</div>
   `;
   return a;
 }

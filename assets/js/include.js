@@ -701,8 +701,14 @@ function enhanceFooter(root) {
   if (!addressContainer) return;
   const rawAddrText = (addressContainer.innerText || "").trim();
   if (!rawAddrText) return;
-  const merkezBlock = extractSection(rawAddrText, /Merkez Ofis/i, /Adana Şube/i);
-  const adanaBlock = extractSection(rawAddrText, /Adana Şube/i, null);
+  const isEnglish = window.location.pathname.startsWith('/eng/');
+  const headOfficeRegex = isEnglish ? /Head Office/i : /Merkez Ofis/i;
+  const branchOfficeRegex = isEnglish ? /Branch Office/i : /Adana Şube/i;
+  const phoneHint = isEnglish ? 'Tap to call' : 'Aramak için dokunun';
+  const emailHint = isEnglish ? 'Write to us' : 'Bize yazın';
+  const mapHint = isEnglish ? 'Tap to open map' : 'Haritayı açmak için dokunun';
+  const merkezBlock = extractSection(rawAddrText, headOfficeRegex, branchOfficeRegex);
+  const adanaBlock = extractSection(rawAddrText, branchOfficeRegex, null);
   const mailAnchors = footer.querySelectorAll('a[href^="mailto:"]');
   mailAnchors.forEach((el) => el.remove());
   const contactPanel = document.createElement('div');
@@ -710,15 +716,15 @@ function enhanceFooter(root) {
   const phoneBtn = document.createElement('a');
   phoneBtn.className = 'alba-footer-action';
   phoneBtn.href = 'tel:+9053877818';
-  phoneBtn.innerHTML = `<div class="action-row"><span class="action-icon">☎</span><span class="action-text">+90 538 778 18</span></div><div class="action-hint alba-blink">Aramak için dokunun</div>`;
+  phoneBtn.innerHTML = `<div class="action-row"><span class="action-icon">☎</span><span class="action-text">+90 538 778 18</span></div><div class="action-hint alba-blink">${phoneHint}</div>`;
   contactPanel.appendChild(phoneBtn);
   const emailBtn = document.createElement('a');
   emailBtn.className = 'alba-footer-action';
   emailBtn.href = 'mailto:hello@albaspace.com.tr';
-  emailBtn.innerHTML = `<div class="action-row"><span class="action-icon">✉</span><span class="action-text">hello@albaspace.com.tr</span></div><div class="action-hint alba-blink">Bize yazın</div>`;
+  emailBtn.innerHTML = `<div class="action-row"><span class="action-icon">✉</span><span class="action-text">hello@albaspace.com.tr</span></div><div class="action-hint alba-blink">${emailHint}</div>`;
   contactPanel.appendChild(emailBtn);
-  const map1 = buildMapButton(merkezBlock);
-  const map2 = buildMapButton(adanaBlock);
+  const map1 = buildMapButton(merkezBlock, mapHint);
+  const map2 = buildMapButton(adanaBlock, mapHint);
   if (map1) contactPanel.appendChild(map1);
   if (map2) contactPanel.appendChild(map2);
   addressContainer.innerHTML = '';
@@ -731,7 +737,7 @@ function enhanceFooter(root) {
   addressContainer.appendChild(contactPanel);
 }
 
-function buildMapButton(blockText) {
+function buildMapButton(blockText, hint) {
   if (!blockText) return null;
   const lines = blockText.split('\n').map((s) => s.trim()).filter(Boolean);
   if (!lines.length) return null;
@@ -744,8 +750,7 @@ function buildMapButton(blockText) {
   a.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address);
   a.target = '_blank';
   a.rel = 'noopener';
-  const hintTr = 'Haritayı açmak için dokunun';
-  a.innerHTML = `<div class="action-row"><span class="action-icon">📍</span><span class="action-text">${escapeHtml(title)}</span></div><div class="map-address">${escapeHtml(address)}</div><div class="action-hint alba-blink">${hintTr}</div>`;
+  a.innerHTML = `<div class="action-row"><span class="action-icon">📍</span><span class="action-text">${escapeHtml(title)}</span></div><div class="map-address">${escapeHtml(address)}</div><div class="action-hint alba-blink">${escapeHtml(hint)}</div>`;
   return a;
 }
 

@@ -1,108 +1,83 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <title>AlbaSpace – Shop</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- Define core colour variables to match the existing site theme.  These
-       variables are referenced in site.css and shop.css for consistency. -->
-  <style>
-    :root {
-      --header-bg: #020617;
-      --accent: #00c2ff;
-      --page-bg: #ffffff;
-      --text-main: #111827;
-      --text-muted: #4b5563;
-    }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-      background: var(--page-bg);
-      color: var(--text-main);
-    }
-  </style>
-
-  <!-- Shop specific styles -->
-  <link rel="stylesheet" href="../assets/css/shop.css" />
-  <script src="../assets/js/include.js" defer></script>
-  <script src="../assets/js/cart.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mağaza – AlbaSpace</title>
+  <!-- Temel stil dosyaları ve mağazaya özel stil -->
+  <link rel="stylesheet" href="/assets/css/site.css">
+  <link rel="stylesheet" href="/assets/css/shop.css">
+  <!-- Header/footer'ı yüklemek ve sepet mantığını eklemek için scriptler -->
+  <script src="/assets/js/include.js" defer></script>
+  <script src="/assets/js/menu-toggle.js" defer></script>
+  <script src="/assets/js/cart.js" defer></script>
 </head>
-
 <body>
-  <!-- Header with navigation and cart icon -->
-  <header class="site-header">
-    <div class="header-inner">
-        <a href="index.html" class="header-logo" style="text-decoration:none;color:inherit;">
-        <span style="font-weight:700;font-size:18px;letter-spacing:0.08em;">AlbaSpace</span>
-      </a>
-      <nav class="main-nav">
-        <a href="index.html">Home</a>
-        <a href="shop.html" class="active">Shop</a>
-      </nav>
-      <div class="cart-icon">
-        <a href="cart.html" aria-label="View cart" style="color:inherit;position:relative;display:inline-flex;align-items:center;">
-          <!-- Simple cart icon drawn with an SVG path -->
-          <svg viewBox="0 0 24 24" stroke-width="1.6" xmlns="http://www.w3.org/2000/svg">
-            <path d="M3 3h2l2.68 10.74a2 2 0 0 0 2 1.54h8.96a2 2 0 0 0 2-1.54L21 6H6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
-            <circle cx="9" cy="21" r="1" fill="currentColor" />
-            <circle cx="19" cy="21" r="1" fill="currentColor" />
-          </svg>
-          <span class="cart-count">0</span>
-        </a>
-      </div>
-    </div>
-  </header>
+  <!-- Dinamik başlık dahil etme. include.js, bunu mevcut sitenizdeki
+       /header-tr.html içeriğiyle değiştirecektir. -->
+  <div data-include="/header-tr.html"></div>
 
-  <!-- Page content -->
   <main class="shop-container">
-    <h1 class="section-title">Shop</h1>
-    <p class="section-subtitle">Discover unique space‑themed products</p>
+    <h1 style="text-align:center;margin-bottom:8px;">Mağaza</h1>
+    <p style="text-align:center;margin-bottom:32px;color:var(--text-muted);">AlbaSpace kıyafet ve koleksiyonlarını keşfedin.</p>
     <div class="product-list">
-      <!-- Dragon Scale Model product card -->
-      <div class="product-card">
-        <a href="product-dragon.html" style="display:block;">
-          <img src="../assets/images/dragon.png" alt="Dragon Scale Model" />
-        </a>
+      <!-- 1 hudie1 -->
+      <a href="/tr/product-hudie1.html" class="product-card">
+        <img src="assets/products/hudie1.png" alt="Hudie">
         <div class="product-info">
-          <h3>Dragon&nbsp;Scale&nbsp;Model</h3>
-          <div class="product-price">$300.00</div>
+          <h3>Hudie</h3>
+          <div class="product-price">1.400,00 TL - discount %30 980,00 TL</div>
         </div>
-      </div>
-      <!-- Unisex Starbase City Pullover Hoodie -->
-      <div class="product-card">
-        <a href="product-hoodie.html" style="display:block;">
-          <img src="../assets/images/hoodie.png" alt="Starbase City Pullover Hoodie" />
-        </a>
+      </a>
+      <!-- 2 Hoodie -->
+      <a href="/tr/product-hoodie.html" class="product-card">
+        <img src="/assets/products/hoodie.png" alt="Hoodie">
         <div class="product-info">
-          <h3>Starbase&nbsp;Pullover&nbsp;Hoodie</h3>
-          <div class="product-price">$65.00</div>
+          <h3>Hoodie</h3>
+          <div class="product-price">1.400.00 TL - discount 30% - 980.00 TL</div>
         </div>
-      </div>
-      <!-- Starbase City 3D Trucker Hat -->
-      <div class="product-card">
-        <a href="product-hat.html" style="display:block;">
-          <img src="../assets/images/hat.png" alt="Starbase City 3D Trucker Hat" />
-        </a>
+      </a>
+      <!-- 3 Katlaç/Sonsuz Küp -->
+      <a href="/tr/product-hat.html" class="product-card">
+        <img src="/assets/products/hat.png" alt="Katlaç/Sonsuz Küp">
         <div class="product-info">
-          <h3>Starbase&nbsp;3D&nbsp;Trucker&nbsp;Hat</h3>
-          <div class="product-price">$40.00</div>
+          <h3>Katlaç/Sonsuz Küp</h3>
+          <div class="product-price">150,00 TL - discount %20 - 120,00 TL</div>
         </div>
-      </div>
-      <!-- Unisex Starbase City T‑Shirt -->
-      <div class="product-card">
-        <a href="product-shirt.html" style="display:block;">
-          <img src="../assets/images/shirt.png" alt="Starbase City T‑Shirt" />
-        </a>
+      </a>
+
+
+      <!-- 4 Trucker şapka -->
+      <a href="/tr/product-stanley.html" class="product-card">
+        <img src="/assets/products/stanley.png" alt="Stanley Termos">
         <div class="product-info">
-          <h3>Starbase&nbsp;City&nbsp;T‑Shirt</h3>
-          <div class="product-price">$35.00</div>
+          <h3>Stanley Termos</h3>
+          <div class="product-price">2.880,00 TL - discount %20 - 2.400,00 TL</div>
         </div>
-      </div>
+      </a>
+
+      <!-- 4 Tişört -->
+      <a href="/tr/product-shirt.html" class="product-card">
+        <img src="/assets/products/shirt.png" alt="T-Shirt">
+        <div class="product-info">
+          <h3>T-Shirt</h3>
+          <div class="product-price">900.00 TL - discount 30% - 630.00 TL</div>
+        </div>
+      </a>
+
+      <!-- 5 Shirt 1 -->
+      <a href="/tr/product-shirt1.html" class="product-card">
+        <img src="/assets/products/shirt1.png" alt="T-Shirt">
+        <div class="product-info">
+          <h3>T-Shirt</h3>
+          <div class="product-price">900.00 TL - discount 30% - 630.00 TL</div>
+        </div>
+      </a>
+
     </div>
   </main>
 
-  <!-- Shared footer (loaded via include.js) -->
-  <div data-include="/eng/footer-en.html"></div>
+  <!-- Dinamik footer dahil etme -->
+  <div data-include="/footer-tr.html"></div>
 </body>
 </html>

@@ -3,34 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AR Try-On v6 (Back Camera)</title>
+    <title>AR Try-On Final</title>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #000; font-family: sans-serif; }
         
-        /* Логгер */
-        #debug-console {
-            position: absolute; top: 0; left: 0; width: 100%; height: 20%;
-            background: rgba(0, 0, 0, 0.3); color: #00ff00;
-            font-family: monospace; font-size: 10px;
-            overflow-y: scroll; z-index: 1000; padding: 5px;
-            pointer-events: none;
-        }
-
-        /* --- ИЗМЕНЕНИЕ 1: УБРАЛИ ЗЕРКАЛЬНОСТЬ --- */
-        /* Для задней камеры transform: scaleX(-1) НЕ НУЖЕН */
-        
+        /* Видео с камеры */
         #input_video {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             object-fit: cover; z-index: 0;
-            /* transform: scaleX(-1);  <-- УДАЛЕНО */
         }
 
+        /* 3D слой */
         #output_canvas { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             z-index: 1; pointer-events: none;
-            /* transform: scaleX(-1); <-- УДАЛЕНО */
         }
 
+        /* Кнопки */
         #ui-container {
             position: absolute; bottom: 30px; left: 0; width: 100%;
             display: flex; justify-content: center; z-index: 10; gap: 20px;
@@ -41,12 +30,15 @@
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
 
+        /* Текст загрузки (исчезнет, когда найдет руку) */
         #loading-text {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: white; font-size: 18px; z-index: 5; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px;
-            text-align: center;
+            color: white; font-size: 18px; z-index: 5; 
+            background: rgba(0,0,0,0.6); padding: 15px 25px; border-radius: 30px;
+            text-align: center; pointer-events: none;
         }
     </style>
 
@@ -66,8 +58,7 @@
 </head>
 <body>
 
-    <div id="debug-console">=== BACK CAMERA MODE v6 ===<br></div>
-    <div id="loading-text">Arka kamera başlatılıyor...<br>(Запуск задней камеры)</div>
+    <div id="loading-text">Kamera başlatılıyor...</div>
 
     <video id="input_video" playsinline muted autoplay></video>
     <canvas id="output_canvas"></canvas>
@@ -77,21 +68,11 @@
         <button class="arrow-btn" id="next-btn">▶</button>
     </div>
 
-    <script>
-        const debugDiv = document.getElementById('debug-console');
-        window.log = function(msg, color='#0f0') {
-            const d = document.createElement('div');
-            d.innerText = `> ${msg}`;
-            d.style.color = color;
-            debugDiv.appendChild(d);
-            debugDiv.scrollTop = debugDiv.scrollHeight;
-        }
-    </script>
-
     <script type="module">
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+        // Имена ваших файлов
         const models = ['ring_01.glb', 'ring_02.glb', 'ring_03.glb'];
         
         const videoElement = document.getElementById('input_video');
@@ -101,125 +82,126 @@
         let currentModelIndex = 0;
         let currentRing = null;
 
-        try {
-            // Three.js Scene
-            const scene = new THREE.Scene();
-            const camera3D = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera3D.position.z = 2;
+        // --- 1. Настройка 3D сцены ---
+        const scene = new THREE.Scene();
+        // Угол обзора камеры чуть шире для удобства (75 -> 80)
+        const camera3D = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera3D.position.z = 2;
 
-            const renderer = new THREE.WebGLRenderer({ canvas: canvasElement, alpha: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
+        const renderer = new THREE.WebGLRenderer({ canvas: canvasElement, alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
 
-            const ambientLight = new THREE.AmbientLight(0xffffff, 1);
-            scene.add(ambientLight);
-            const dirLight = new THREE.DirectionalLight(0xffffff, 2);
-            dirLight.position.set(2, 5, 5);
-            scene.add(dirLight);
+        // Свет
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 2);
+        dirLight.position.set(2, 5, 5);
+        scene.add(dirLight);
 
-            // Loader
-            const loader = new GLTFLoader();
-            function loadRing(index) {
-                window.log(`Loading: ${models[index]}...`);
-                if (currentRing) { scene.remove(currentRing); currentRing = null; }
+        // --- 2. Загрузка моделей ---
+        const loader = new GLTFLoader();
 
-                loader.load(models[index], (gltf) => {
-                    window.log("Model OK!");
-                    currentRing = gltf.scene;
-                    currentRing.scale.set(15, 15, 15); 
-                    scene.add(currentRing);
-                }, undefined, (error) => {
-                    window.log(`FILE NOT FOUND: ${models[index]}`, 'orange');
-                    const geo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-                    const mat = new THREE.MeshNormalMaterial();
-                    currentRing = new THREE.Mesh(geo, mat);
-                    scene.add(currentRing);
-                });
-            }
-            loadRing(0);
+        function loadRing(index) {
+            if (currentRing) { scene.remove(currentRing); currentRing = null; }
 
-            // MediaPipe Hands
-            const hands = new window.Hands({locateFile: (file) => {
-                return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-            }});
-
-            hands.setOptions({
-                maxNumHands: 1,
-                modelComplexity: 1,
-                minDetectionConfidence: 0.5,
-                minTrackingConfidence: 0.5
+            loader.load(models[index], (gltf) => {
+                currentRing = gltf.scene;
+                // Масштаб (подберите под свои модели)
+                currentRing.scale.set(15, 15, 15); 
+                scene.add(currentRing);
+            }, undefined, (error) => {
+                console.warn("Модель не найдена, создаю куб-заглушку");
+                // Если файла нет - рисуем кубик (чтобы вы видели, что код работает)
+                const geo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+                const mat = new THREE.MeshNormalMaterial();
+                currentRing = new THREE.Mesh(geo, mat);
+                scene.add(currentRing);
             });
-
-            hands.onResults((results) => {
-                renderer.clear();
-
-                if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-                    loadingText.style.display = 'none';
-                    
-                    const landmarks = results.multiHandLandmarks[0];
-                    const p13 = landmarks[13];
-                    const p14 = landmarks[14];
-
-                    if (currentRing) {
-                        // --- ИЗМЕНЕНИЕ: ЛОГИКА КООРДИНАТ ---
-                        // Так как мы убрали зеркальность, инверсия X больше не нужна так, как раньше.
-                        // Но координаты MediaPipe всегда 0..1 (слева направо).
-                        // Three.js: 0 в центре.
-                        // X без зеркала: (x - 0.5)
-                        
-                        const x = (p13.x + p14.x) / 2; // Средняя точка X (0..1)
-                        const y = (p13.y + p14.y) / 2; // Средняя точка Y (0..1)
-
-                        // Конвертация в координаты сцены Three.js
-                        // (x - 0.5) * -10 (минус нужен, чтобы двигалось в правильную сторону относительно камеры)
-                        const screenX = -(x - 0.5) * 10; 
-                        const screenY = -(y - 0.5) * 10;
-                        const screenZ = -5;
-
-                        currentRing.position.set(screenX, screenY, screenZ);
-
-                        // Вращение
-                        const dx = p14.x - p13.x;
-                        const dy = p14.y - p13.y;
-                        const angle = Math.atan2(dy, dx);
-                        
-                        // Поворот может потребовать корректировки знака из-за отсутствия зеркала
-                        currentRing.rotation.z = -angle + Math.PI/2; 
-                        currentRing.rotation.x = 0.2;
-                    }
-                } else {
-                     // Если руку потеряли
-                }
-                renderer.render(scene, camera3D);
-            });
-
-            // --- ИЗМЕНЕНИЕ 2: НАСТРОЙКА КАМЕРЫ ---
-            const camera = new window.Camera(videoElement, {
-                onFrame: async () => {
-                    await hands.send({image: videoElement});
-                },
-                width: 1280,
-                height: 720,
-                facingMode: 'environment' // <--- ЭТА СТРОЧКА ВКЛЮЧАЕТ ЗАДНЮЮ КАМЕРУ
-            });
-            
-            camera.start()
-                .then(() => window.log("Back Camera Started!"))
-                .catch(err => window.log(`CAMERA ERROR: ${err.message}`, 'red'));
-
-            // Buttons
-            document.getElementById('next-btn').onclick = () => {
-                currentModelIndex = (currentModelIndex + 1) % models.length;
-                loadRing(currentModelIndex);
-            }
-            document.getElementById('prev-btn').onclick = () => {
-                currentModelIndex = (currentModelIndex - 1 + models.length) % models.length;
-                loadRing(currentModelIndex);
-            }
-
-        } catch (e) {
-            window.log(`ERROR: ${e.message}`, 'red');
         }
+        loadRing(0);
+
+        // --- 3. Распознавание рук (MediaPipe) ---
+        const hands = new window.Hands({locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+        }});
+
+        hands.setOptions({
+            maxNumHands: 1,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
+        });
+
+        hands.onResults((results) => {
+            renderer.clear();
+
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                loadingText.style.display = 'none'; // Рука найдена - скрываем текст
+                
+                const landmarks = results.multiHandLandmarks[0];
+                const p13 = landmarks[13]; // Основание пальца
+                const p14 = landmarks[14]; // Костяшка
+
+                if (currentRing) {
+                    // --- МАТЕМАТИКА КООРДИНАТ (ИСПРАВЛЕНА) ---
+                    
+                    const x = (p13.x + p14.x) / 2;
+                    const y = (p13.y + p14.y) / 2;
+
+                    // РАНЬШЕ БЫЛО: -(x - 0.5) * 10 
+                    // ТЕПЕРЬ (Без минуса): (x - 0.5) * 10
+                    // Это исправляет зеркальность движения
+                    const screenX = (x - 0.5) * 10; 
+                    
+                    // Y остается с минусом, так как в 3D "вверх" это плюс, а на экране Y=0 это верх
+                    const screenY = -(y - 0.5) * 10;
+                    
+                    const screenZ = -5; // Глубина
+
+                    currentRing.position.set(screenX, screenY, screenZ);
+
+                    // Вращение кольца под палец
+                    const dx = p14.x - p13.x;
+                    const dy = p14.y - p13.y;
+                    const angle = Math.atan2(dy, dx);
+                    
+                    // Коррекция вращения
+                    currentRing.rotation.z = -angle + Math.PI/2; 
+                    currentRing.rotation.x = 0.2;
+                }
+            }
+            renderer.render(scene, camera3D);
+        });
+
+        // --- 4. Запуск Камеры ---
+        const camera = new window.Camera(videoElement, {
+            onFrame: async () => {
+                await hands.send({image: videoElement});
+            },
+            width: 1280,
+            height: 720,
+            facingMode: 'environment' // Задняя камера
+        });
+        
+        camera.start();
+
+        // Кнопки переключения
+        document.getElementById('next-btn').onclick = () => {
+            currentModelIndex = (currentModelIndex + 1) % models.length;
+            loadRing(currentModelIndex);
+        }
+        document.getElementById('prev-btn').onclick = () => {
+            currentModelIndex = (currentModelIndex - 1 + models.length) % models.length;
+            loadRing(currentModelIndex);
+        }
+
+        // Обработка поворота экрана
+        window.addEventListener('resize', () => {
+            camera3D.aspect = window.innerWidth / window.innerHeight;
+            camera3D.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
     </script>
 </body>
 </html>
