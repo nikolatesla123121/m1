@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AR Try-On v8 (Final Polish)</title>
+    <title>AR Try-On v10 (Debug Skeleton)</title>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #000; font-family: sans-serif; }
         
@@ -12,9 +12,16 @@
             object-fit: cover; z-index: 0;
         }
 
+        /* Канвас для 3D кольца */
         #output_canvas { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             z-index: 1; pointer-events: none;
+        }
+
+        /* НОВЫЙ Канвас для рисования скелета руки (отладка) */
+        #debug_canvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2; pointer-events: none;
         }
 
         #ui-container {
@@ -27,14 +34,13 @@
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
         }
 
-        #loading-text {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: white; font-size: 16px; z-index: 5; 
-            background: rgba(0,0,0,0.6); padding: 15px 25px; border-radius: 30px;
-            text-align: center; pointer-events: none;
+        #status-text {
+            position: absolute; top: 10%; left: 0; width: 100%;
+            color: lime; font-size: 14px; z-index: 20; 
+            text-align: center; text-shadow: 1px 1px 2px black;
+            pointer-events: none;
         }
     </style>
 
@@ -54,10 +60,11 @@
 </head>
 <body>
 
-    <div id="loading-text">Kamera başlatılıyor...<br>Elini göster (Покажи руку)</div>
+    <div id="status-text">Ожидание руки...<br>(Включите нормальный свет!)</div>
 
     <video id="input_video" playsinline muted autoplay></video>
     <canvas id="output_canvas"></canvas>
+    <canvas id="debug_canvas"></canvas>
 
     <div id="ui-container">
         <button class="arrow-btn" id="prev-btn">◀</button>
@@ -68,17 +75,18 @@
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-        // Имена ваших файлов
         const models = ['ring_01.glb', 'ring_02.glb', 'ring_03.glb'];
         
         const videoElement = document.getElementById('input_video');
         const canvasElement = document.getElementById('output_canvas');
-        const loadingText = document.getElementById('loading-text');
+        const debugCanvas = document.getElementById('debug_canvas');
+        const debugCtx = debugCanvas.getContext('2d');
+        const statusText = document.getElementById('status-text');
 
         let currentModelIndex = 0;
         let currentRing = null;
 
-        // 1. Scene
+        // --- 1. Three.js ---
         const scene = new THREE.Scene();
         const camera3D = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera3D.position.z = 2;
@@ -87,18 +95,14 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
 
-        // 2. Улучшенный свет (чтобы кольцо не было черным)
-        // Общий свет (заполняющий)
         const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 2.0); 
         hemiLight.position.set(0, 20, 0);
         scene.add(hemiLight);
-
-        // Направленный свет (как солнце, чтобы был блеск)
         const dirLight = new THREE.DirectionalLight(0xffffff, 2.5);
         dirLight.position.set(3, 10, 10);
         scene.add(dirLight);
 
-        // 3. Загрузка моделей
+        // --- 2. Loader ---
         const loader = new GLTFLoader();
 
         function loadRing(index) {
@@ -106,22 +110,22 @@
 
             loader.load(models[index], (gltf) => {
                 currentRing = gltf.scene;
-                // Уменьшил масштаб с 15 до 10, чтобы кольцо было аккуратнее
                 currentRing.scale.set(10, 10, 10); 
+                currentRing.visible = false; // СКРЫВАЕМ ПОКА НЕ НАЙДЕМ РУКУ
                 scene.add(currentRing);
             }, undefined, (error) => {
-                console.log("Файл не найден, создаю бублик");
-                // Fallback: Желтый бублик (Torus)
-                const geo = new THREE.TorusGeometry(0.6, 0.1, 16, 32);
-                const mat = new THREE.MeshStandardMaterial({ color: 0xFFD700, metalness: 0.8, roughness: 0.2 });
+                console.log("Fallback");
+                const geo = new THREE.TorusGeometry(0.3, 0.05, 16, 32);
+                geo.rotateX(Math.PI / 2); 
+                const mat = new THREE.MeshStandardMaterial({ color: 0xFFD700 });
                 currentRing = new THREE.Mesh(geo, mat);
-                currentRing.scale.set(1, 1, 1); // Бублик уже нормального размера
+                currentRing.visible = false; // СКРЫВАЕМ ПОКА НЕ НАЙДЕМ РУКУ
                 scene.add(currentRing);
             });
         }
         loadRing(0);
 
-        // 4. MediaPipe
+        // --- 3. MediaPipe ---
         const hands = new window.Hands({locateFile: (file) => {
             return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
         }});
@@ -134,42 +138,42 @@
         });
 
         hands.onResults((results) => {
+            // Очистка слоев
             renderer.clear();
+            debugCtx.clearRect(0, 0, debugCanvas.width, debugCanvas.height);
 
             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-                loadingText.style.display = 'none';
+                statusText.innerText = "РУКА НАЙДЕНА!";
                 
                 const landmarks = results.multiHandLandmarks[0];
-                const p13 = landmarks[13]; // MCP
-                const p14 = landmarks[14]; // PIP
 
+                // 1. РИСУЕМ СКЕЛЕТ (Красные линии)
+                drawConnectors(debugCtx, landmarks, HAND_CONNECTIONS, {color: '#00FF00', lineWidth: 2});
+                drawLandmarks(debugCtx, landmarks, {color: '#FF0000', lineWidth: 1, radius: 3});
+
+                // 2. ДВИГАЕМ КОЛЬЦО
                 if (currentRing) {
-                    // Координаты
+                    currentRing.visible = true; // ПОКАЗЫВАЕМ КОЛЬЦО
+
+                    const p13 = landmarks[13];
+                    const p14 = landmarks[14];
+
                     const x = (p13.x + p14.x) / 2;
                     const y = (p13.y + p14.y) / 2;
-
+                    
                     const screenX = (x - 0.5) * 10; 
                     const screenY = -(y - 0.5) * 10;
                     const screenZ = -5;
-
                     currentRing.position.set(screenX, screenY, screenZ);
 
-                    // Вращение
                     const dx = p14.x - p13.x;
                     const dy = p14.y - p13.y;
                     const angle = Math.atan2(dy, dx);
-                    
-                    // --- ИСПРАВЛЕНИЕ ОРИЕНТАЦИИ ---
-                    // Вращаем вокруг Z (поворот пальца на экране)
-                    currentRing.rotation.z = -angle + Math.PI/2; 
-                    
-                    // Вращаем вокруг X, чтобы "положить" кольцо на палец
-                    // Попробуйте менять это значение, если кольцо всё еще стоит боком
-                    // Math.PI / 2 = 90 градусов
-                    currentRing.rotation.x = Math.PI / 2; 
+                    currentRing.rotation.z = angle - Math.PI / 2;
                 }
             } else {
-                 // Если руку потеряли, можно показать текст снова (опционально)
+                statusText.innerText = "Рука НЕ видна (проверьте свет)";
+                if(currentRing) currentRing.visible = false; // Скрываем кольцо, если руки нет
             }
             renderer.render(scene, camera3D);
         });
@@ -184,6 +188,19 @@
         });
         camera.start();
 
+        // Синхронизация размеров канвасов
+        function resize() {
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            camera3D.aspect = w / h;
+            camera3D.updateProjectionMatrix();
+            renderer.setSize(w, h);
+            debugCanvas.width = w;
+            debugCanvas.height = h;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
         // Кнопки
         document.getElementById('next-btn').onclick = () => {
             currentModelIndex = (currentModelIndex + 1) % models.length;
@@ -193,12 +210,6 @@
             currentModelIndex = (currentModelIndex - 1 + models.length) % models.length;
             loadRing(currentModelIndex);
         }
-
-        window.addEventListener('resize', () => {
-            camera3D.aspect = window.innerWidth / window.innerHeight;
-            camera3D.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
     </script>
 </body>
 </html>
