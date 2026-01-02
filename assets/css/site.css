@@ -39,6 +39,13 @@ body{
     /* Fit to screen width without distortion */
     background-size: 100vw auto !important;
     background-position: center center !important;
+    /* Default gradient for non-index pages */
+    background: linear-gradient(to bottom, #00008B, #FF1493) !important;
+  }
+
+  /* For index pages, keep the space background */
+  body.home-page, body.index-page {
+    background: #020617 url('/assets/images/space-bg.jpg') center/cover scroll no-repeat !important;
   }
 }
 
