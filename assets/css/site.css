@@ -151,7 +151,13 @@ body{
 .header-social{
   margin-left:auto;
   display:flex;
-  gap:14px;
+  flex-direction: column;
+  gap:8px;
+}
+
+.header-social .social-row {
+  display: flex;
+  gap: 14px;
 }
 
 /* Иконки соцсетей (PNG) в хедере */
@@ -450,6 +456,11 @@ body{
 }
 
 /* Flag buttons same size as social icons */
+.top-lang-switch{
+  display:flex;
+  gap:14px;
+}
+
 .top-lang-switch .lang-flag{
   width:22px;
   height:22px;
