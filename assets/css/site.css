@@ -745,7 +745,7 @@ body{
    ========================= */
 
 footer.footer{
-  background: var(--header-bg);
+  background: #111827;
   color:#d1d5db;
   padding:26px 20px;
   font-size:13px;
