@@ -27,6 +27,8 @@ body{
   body {
     /* Force scrolling attachment to prevent zoom/stretch on iOS */
     background-attachment: scroll !important;
+    /* Use mobile-optimized background image */
+    background-image: url('/assets/images/apacebackgroundformobile.jpg') !important;
   }
 }
 
