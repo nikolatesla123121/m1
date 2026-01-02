@@ -179,10 +179,21 @@ body{
   min-width: 150px;
   z-index: 1000;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .dropdown:hover .dropdown-menu {
   display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dropdown.active .dropdown-menu {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .dropdown-menu a {
@@ -1054,7 +1065,6 @@ footer.footer{
 
   /* На мобильных меню скрыто по умолчанию; выезжает справа и занимает 1/3 ширины */
   .main-nav{
-    display:none;
     position:absolute;
     top:calc(100% + 10px);
     right:12px;
@@ -1077,11 +1087,17 @@ footer.footer{
     overflow:hidden;
     -webkit-backdrop-filter: blur(6px);
     backdrop-filter: blur(6px);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-20px);
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
   }
 
   /* Показываем меню когда оно открыто; добавляем статическое свечение, похожее на кнопки */
   .main-nav.nav-open{
-    display:flex;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
     box-shadow:
       0 12px 34px rgba(56,189,248,0.6),
       0 0 40px rgba(56,189,248,0.18) inset;
@@ -1099,6 +1115,33 @@ footer.footer{
 
   .main-nav a:last-child{
     border-bottom:none;
+  }
+
+  /* Mobile dropdown */
+  .main-nav .dropdown {
+    position: static;
+  }
+
+  .main-nav .dropdown-menu {
+    position: static;
+    display: none;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    opacity: 1;
+    transform: none;
+    transition: none;
+    padding-left: 20px;
+  }
+
+  .main-nav .dropdown.active .dropdown-menu {
+    display: block;
+  }
+
+  .main-nav .dropdown-menu a {
+    padding: 8px 18px 8px 38px;
+    font-size: 13px;
+    border-bottom: none;
   }
 
   /* Социальные иконки остаются видимыми на мобильных */
@@ -1916,6 +1959,110 @@ model-viewer{
   margin: 40px 0;
   font-size: 18px;
   color: var(--text-muted);
+}
+
+/* =========================
+   MOBILE RESPONSIVE IMPROVEMENTS
+   ========================= */
+
+@media (max-width: 768px) {
+  /* Hero sections */
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+  .hero h1 {
+    font-size: 32px;
+  }
+  .hero .lead {
+    font-size: 14px;
+  }
+  .hero-buttons {
+    gap: 16px;
+  }
+
+  /* Product lists */
+  .product-list {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .product-card {
+    width: 100%;
+    max-width: 320px;
+    min-height: auto;
+    padding: 12px;
+  }
+  .product-card img {
+    height: 280px;
+  }
+  .product-card .product-info {
+    padding: 12px;
+  }
+
+  /* Card containers */
+  .card-container {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .category-card {
+    max-width: 100%;
+  }
+
+  /* Touch-friendly padding */
+  .btn-primary, .btn-outline {
+    padding: 12px 20px;
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  /* AI Widget mobile adjustments */
+  .ai-floating {
+    right: 10px;
+    bottom: 10px;
+    gap: 8px;
+  }
+  .ai-hero-avatar {
+    width: 80px;
+    height: 80px;
+    border-width: 2px;
+  }
+  .ai-call-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+  .ai-call-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+  .ai-panel-global {
+    width: 90vw;
+    height: 70vh;
+    bottom: 10px;
+    right: 10px;
+  }
+
+  /* Touch-friendly elements */
+  a, button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  .main-nav a {
+    padding: 14px 18px;
+  }
+  .dropdown-trigger {
+    padding: 14px 18px;
+  }
+  .header-social a {
+    padding: 8px;
+  }
+  /* Touch hover effects */
+  a:active, button:active {
+    transform: scale(0.98);
+  }
+}
 }
 
 

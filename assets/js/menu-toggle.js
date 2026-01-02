@@ -35,4 +35,15 @@
       }
     }
   });
+
+  // Mobile dropdown toggle
+  var dropdownTriggers = nav.querySelectorAll('.dropdown-trigger');
+  dropdownTriggers.forEach(function(trigger) {
+    trigger.addEventListener('click', function(e) {
+      e.preventDefault();
+      var dropdown = trigger.parentElement;
+      var isActive = dropdown.classList.toggle('active');
+      trigger.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+    });
+  });
 })();
