@@ -40,7 +40,7 @@ body{
     background-size: 100vw auto !important;
     background-position: center center !important;
     /* Default gradient for non-index pages */
-    background: linear-gradient(to bottom, #00008B, #FF1493) !important;
+    background: linear-gradient(to bottom, #040418, #030007) !important;
   }
 
   /* For index pages, keep the space background */
