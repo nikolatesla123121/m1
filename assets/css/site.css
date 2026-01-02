@@ -35,7 +35,7 @@ body{
     /* Force scrolling attachment to prevent zoom/stretch on iOS */
     background-attachment: scroll !important;
     /* Use mobile-optimized background image */
-    background-image: url('/assets/images/apacebackgroundformobile.jpg') !important;
+    background-image: url('/assets/images/111apacebackgroundformobile.jpg') !important;
     /* Fit to screen width without distortion */
     background-size: 100vw auto !important;
     background-position: center center !important;
@@ -46,6 +46,8 @@ body{
 @media (min-width: 768px) {
   body {
     background-attachment: fixed !important;
+    background-position: center bottom !important;
+    background-color: #000000 !important;
   }
 }
 
@@ -1162,15 +1164,50 @@ footer.footer{
     align-items:center;
   }
 
+  .header-social a {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    transition: background 0.2s ease;
+  }
+
+  .header-social a:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
   .header-social img{
-    width:20px;
-    height:20px;
+    width:24px;
+    height:24px;
   }
 
   /* Переключатель языков остаётся видимым */
   .top-lang-switch{
     order:10;
     margin-left:auto;
+    display: flex;
+    gap: 8px;
+  }
+
+  .top-lang-switch a {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    transition: background 0.2s ease;
+    text-decoration: none;
+    color: #d1d5db;
+    font-weight: 600;
+  }
+
+  .top-lang-switch a:hover {
+    background: rgba(255, 255, 255, 0.2);
   }
 
   /* Хедер на мобильных */
@@ -2073,6 +2110,4 @@ model-viewer{
     transform: scale(0.98);
   }
 }
-}
-
 
